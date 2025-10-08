@@ -1,0 +1,51 @@
+-- USERS TABLE
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- SERVICES TABLE
+CREATE TABLE IF NOT EXISTS services (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  code TEXT UNIQUE,
+  name TEXT,
+  price_per_month INTEGER,
+  unit TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CART ITEMS TABLE
+CREATE TABLE IF NOT EXISTS cart_items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER,
+  service_id INTEGER,
+  quantity INTEGER DEFAULT 1,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(user_id) REFERENCES users(id),
+  FOREIGN KEY(service_id) REFERENCES services(id)
+);
+
+-- ORDERS TABLE
+CREATE TABLE IF NOT EXISTS orders (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER,
+  total_amount INTEGER,
+  discount_amount INTEGER,
+  payable_amount INTEGER,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(user_id) REFERENCES users(id)
+);
+
+-- ORDER ITEMS TABLE
+CREATE TABLE IF NOT EXISTS order_items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  order_id INTEGER,
+  service_id INTEGER,
+  quantity INTEGER,
+  unit_price INTEGER,
+  FOREIGN KEY(order_id) REFERENCES orders(id),
+  FOREIGN KEY(service_id) REFERENCES services(id)
+);
