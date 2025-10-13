@@ -10,7 +10,7 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        git branch: 'main', url: 'https://github.com/Prem-G01/frustrated-cloud.git'
+        git branch: 'master', url: 'https://github.com/Prem-G01/frustrated-cloud.git'
       }
     }
 
