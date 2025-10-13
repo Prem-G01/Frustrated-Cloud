@@ -1,56 +1,51 @@
 pipeline {
-  agent any
+    agent any
 
-  environment {
-    APP_NAME = "Frustrated-Cloud"
-  }
-
-  stages {
-    stage('Checkout') {
-      steps {
-        git branch: 'master', url: 'https://github.com/Prem-G01/frustrated-cloud.git'
-      }
+    environment {
+        APP_NAME = "Frustrated-Cloud"
     }
 
-    stage('Build Docker images') {
-      steps {
-        sh 'docker build -t frustrated-cloud-backend ./backend'
-        sh 'docker build -t frustrated-cloud-frontend ./frontend'
-      }
-    }
-
-    stage('Deploy') {
-      steps {
-        sshagent (credentials: ['web-serverSSH']) {
-          sh '''
-          # Copy local Docker images to remote server
-          scp <(docker save frustrated-cloud-backend) ubuntu@3.110.162.216:~/frustrated-cloud/frustrated-cloud-backend.tar
-          scp <(docker save frustrated-cloud-frontend) ubuntu@3.110.162.216:~/frustrated-cloud/frustrated-cloud-frontend.tar
-
-          # SSH into remote server and load images
-          ssh -o StrictHostKeyChecking=no ubuntu@3.110.162.216 << 'EOF'
-          cd ~/frustrated-cloud
-
-          # Load Docker images
-          docker load -i frustrated-cloud-backend.tar
-          docker load -i frustrated-cloud-frontend.tar
-
-          # Deploy using docker-compose
-          docker compose down
-          docker compose up -d
-          EOF
-          '''
+    stages {
+        stage('Checkout') {
+            steps {
+                // Jenkins just pulls Jenkinsfile for pipeline definition
+                git branch: 'master', url: 'https://github.com/Prem-G01/Frustrated-Cloud.git'
+            }
         }
-      }
-    }
-  }
 
-  post {
-    success {
-      echo '✅ Deployment successful!'
+        stage('Deploy on Docker Server') {
+            steps {
+                sshagent (credentials: ['web-serverSSH']) {
+                    sh '''
+                    ssh -o StrictHostKeyChecking=no ubuntu@YOUR_DOCKER_SERVER_IP << 'EOF'
+                    
+                    # Navigate to project folder on Docker server
+                    cd ~/frustrated-cloud
+                    
+                    # Pull latest code from GitHub
+                    git pull origin master
+                    
+                    # Build Docker images on Docker server
+                    docker build -t frustrated-cloud-backend ./backend
+                    docker build -t frustrated-cloud-frontend ./frontend
+                    
+                    # Deploy using Docker Compose
+                    docker compose down
+                    docker compose up -d --build
+
+                    EOF
+                    '''
+                }
+            }
+        }
     }
-    failure {
-      echo '❌ Deployment failed!'
+
+    post {
+        success {
+            echo '✅ Deployment successful!'
+        }
+        failure {
+            echo '❌ Deployment failed!'
+        }
     }
-  }
 }
