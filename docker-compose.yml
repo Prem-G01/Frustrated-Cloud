@@ -17,7 +17,7 @@ services:
     build: ./frontend
     container_name: fc-frontend
     ports:
-      - "5173:80"
+      - "4001:80"
     depends_on:
       - backend
     restart: always
