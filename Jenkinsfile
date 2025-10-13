@@ -11,10 +11,7 @@ pipeline {
             steps {
                 echo "Stage-1"
                  script {
-                    // Assuming 'GitHub-Personal-Access-Token' is the ID of your GitHub Credential
-                    checkout([$class: 'GitSCM', branches: [[name: '*/master']], 
-                              userRemoteConfigs: [[credentialsId: 'git-pat', 
-                                                   url: 'https://github.com/Prem-G01/Frustrated-Cloud']]])
+                     git branch: 'master', url: 'https://github.com/Prem-G01/Frustrated-Cloud.git'
                 }
             }
         }
