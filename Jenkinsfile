@@ -2,8 +2,12 @@ pipeline {
   agent any
 
   environment {
-    DOCKERHUB_USER = credentials('doc-pass-username')
-    DOCKERHUB_PASS = credentials('dockerhub-password')
+    withCredentials([usernamePassword(credentialsId: 'dockerhub-username', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+      DOCKERHUB_USER = $USER
+      DOCKERHUB_PASS = $PASS
+    }
+    // DOCKERHUB_USER = credentials('doc-pass-username')
+    // DOCKERHUB_PASS = credentials('dockerhub-password')
   }
 
   stages {
