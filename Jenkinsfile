@@ -2,38 +2,51 @@ pipeline {
     agent any
 
     environment {
-        SSH_CRED = 'web-serverSSH'
-        WEBAPP_IP = '3.110.162.216'
+        APP_NAME = "Frustrated-Cloud"
+        DOCKER_SERVER = "ubuntu@3.110.162.216"
     }
 
     stages {
+
         stage('Checkout Code') {
             steps {
-                echo "Stage-1"
-                 script {
-                     git branch: 'master', url: 'https://github.com/Prem-G01/Frustrated-Cloud.git'
+                echo "Stage-1: Checking out source code"
+                script {
+                    git branch: 'master',
+                        credentialsId: 'git-pat',
+                        url: 'https://github.com/Prem-G01/Frustrated-Cloud.git'
                 }
             }
         }
 
-        stage('Build Docker Images') {
+        stage('Build & Deploy on Remote Docker Server') {
             steps {
-                echo "Stage-2"
-                sh '''
-                docker build -t backend:latest ./backend
-                docker build -t frontend:latest ./frontend
-                '''
-            }
-        }
-
-        stage('Deploy to EC2 WebApp Server') {
-            steps {
-                echo "Stage-3"
-                sshagent (credentials: ["${SSH_CRED}"]) {
+                echo "Stage-2: Building and deploying on remote Docker host"
+                sshagent(['web-server']) {
                     sh '''
-                    scp -o StrictHostKeyChecking=no docker-compose.yml ubuntu@${WEBAPP_IP}:/home/ubuntu/
-                    rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" ./backend ./frontend ubuntu@${WEBAPP_IP}:/home/ubuntu/
-                    ssh -o StrictHostKeyChecking=no ubuntu@${WEBAPP_IP} "cd /home/ubuntu && docker-compose down && docker-compose up -d --build"
+                    ssh -o StrictHostKeyChecking=no ${DOCKER_SERVER} << 'EOF'
+                        set -e
+                        echo "🚀 Starting deployment on Docker host..."
+
+                        # Ensure project directory exists
+                        if [ ! -d "/home/ubuntu/Frustrated-Cloud" ]; then
+                            echo "📦 Cloning repository..."
+                            git clone https://github.com/Prem-G01/Frustrated-Cloud.git
+                        fi
+
+                        cd /home/ubuntu/Frustrated-Cloud
+                        echo "🔄 Pulling latest changes..."
+                        git pull origin master
+
+                        echo "🧱 Building Docker containers..."
+                        docker compose down || true
+                        docker compose build
+
+                        echo "🚀 Starting containers..."
+                        docker compose up -d
+
+                        echo "✅ Deployment completed successfully!"
+                    EOF
                     '''
                 }
             }
@@ -42,10 +55,10 @@ pipeline {
 
     post {
         success {
-            echo "✅ Deployment completed successfully!"
+            echo "✅ Deployment pipeline executed successfully!"
         }
         failure {
-            echo "❌ Deployment failed!"
+            echo "❌ Deployment pipeline failed!"
         }
         always {
             echo "🔁 Pipeline finished."
