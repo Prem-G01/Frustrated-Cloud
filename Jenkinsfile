@@ -2,10 +2,6 @@ pipeline {
   agent any
 
   environment {
-    withCredentials([usernamePassword(credentialsId: 'dockerhub-username', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-      DOCKERHUB_USER = $USER
-      DOCKERHUB_PASS = $PASS
-    }
     // DOCKERHUB_USER = credentials('doc-pass-username')
     // DOCKERHUB_PASS = credentials('dockerhub-password')
   }
@@ -27,11 +23,14 @@ pipeline {
     stage('Push to DockerHub') {
       steps {
         script {
-          sh "echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin"
-          sh "docker tag frustrated-cloud-backend $DOCKERHUB_USER/frustrated-cloud-backend:latest"
-          sh "docker tag frustrated-cloud-frontend $DOCKERHUB_USER/frustrated-cloud-frontend:latest"
-          sh "docker push $DOCKERHUB_USER/frustrated-cloud-backend:latest"
-          sh "docker push $DOCKERHUB_USER/frustrated-cloud-frontend:latest"
+          withCredentials([usernamePassword(credentialsId: 'dockerhub-username', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+            DOCKERHUB_USER = $USER
+            DOCKERHUB_PASS = $PASS
+            sh "echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin"
+            sh "docker tag frustrated-cloud-backend $DOCKERHUB_USER/frustrated-cloud-backend:latest"
+            sh "docker tag frustrated-cloud-frontend $DOCKERHUB_USER/frustrated-cloud-frontend:latest"
+            sh "docker push $DOCKERHUB_USER/frustrated-cloud-backend:latest"
+            sh "docker push $DOCKERHUB_USER/frustrated-cloud-frontend:latest"
         }
       }
     }
