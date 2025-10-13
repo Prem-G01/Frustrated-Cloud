@@ -2,6 +2,7 @@ pipeline {
   agent any
 
   environment {
+    APP_NAME = "Frustrated-Cloud"
     // DOCKERHUB_USER = credentials('doc-pass-username')
     // DOCKERHUB_PASS = credentials('dockerhub-password')
   }
