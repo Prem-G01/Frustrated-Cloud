@@ -9,7 +9,7 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        git branch: 'main', url: 'https://github.com/yourusername/frustrated-cloud.git'
+        git branch: 'main', url: 'https://github.com/Prem-G01/frustrated-cloud.git'
       }
     }
 
@@ -34,9 +34,9 @@ pipeline {
 
     stage('Deploy') {
       steps {
-        sshagent (credentials: ['webserver-ssh']) {
+        sshagent (credentials: ['web-serverSSH']) {
           sh '''
-          ssh -o StrictHostKeyChecking=no user@your-webserver << 'EOF'
+          ssh -o StrictHostKeyChecking=no ubuntu@3.110.162.216 << 'EOF'
           cd ~/frustrated-cloud
           git pull origin main
           docker compose down
