@@ -17,7 +17,7 @@ pipeline {
             steps {
                 sshagent (credentials: ['web-serverSSH']) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@YOUR_DOCKER_SERVER_IP << 'EOF'
+                    ssh -o StrictHostKeyChecking=no ubuntu@3.110.162.216 << 'EOF'
                     
                     # Navigate to project folder on Docker server
                     cd ~/frustrated-cloud
