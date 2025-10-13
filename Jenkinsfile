@@ -23,14 +23,20 @@ pipeline {
     stage('Push to DockerHub') {
       steps {
         script {
-          withCredentials([usernamePassword(credentialsId: 'dockerhub-username', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-            DOCKERHUB_USER = $USER
-            DOCKERHUB_PASS = $PASS
-            sh "echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin"
-            sh "docker tag frustrated-cloud-backend $DOCKERHUB_USER/frustrated-cloud-backend:latest"
-            sh "docker tag frustrated-cloud-frontend $DOCKERHUB_USER/frustrated-cloud-frontend:latest"
-            sh "docker push $DOCKERHUB_USER/frustrated-cloud-backend:latest"
-            sh "docker push $DOCKERHUB_USER/frustrated-cloud-frontend:latest"
+          withCredentials([usernamePassword(credentialsId: 'dockerhub-username',
+                                                      usernameVariable: 'USER',
+                                                      passwordVariable: 'PASS')]) {
+              def docker_user = USER
+              def docker_pass = PASS
+
+              sh """
+                  echo "${docker_pass}" | docker login -u "${docker_user}" --password-stdin
+                  docker tag frustrated-cloud-backend "${docker_user}/frustrated-cloud-backend:latest"
+                  docker tag frustrated-cloud-frontend "${docker_user}/frustrated-cloud-frontend:latest"
+                  docker push "${docker_user}/frustrated-cloud-backend:latest"
+                  docker push "${docker_user}/frustrated-cloud-frontend:latest"
+              """
+          }
         }
       }
     }
