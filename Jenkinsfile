@@ -2,41 +2,42 @@ pipeline {
     agent any
 
     environment {
-        APP_NAME = "Frustrated-Cloud"
+        SSH_CRED = 'web-serverSSH'
+        WEBAPP_IP = '3.110.162.216'
     }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
-                // Jenkins just pulls Jenkinsfile for pipeline definition
-                git branch: 'master', url: 'https://github.com/Prem-G01/Frustrated-Cloud.git'
+                echo "Stage-1"
+                 script {
+                    // Assuming 'GitHub-Personal-Access-Token' is the ID of your GitHub Credential
+                    checkout([$class: 'GitSCM', branches: [[name: '*/master']], 
+                              userRemoteConfigs: [[credentialsId: 'git-pat', 
+                                                   url: 'https://github.com/Prem-G01/Frustrated-Cloud']]])
+                }
             }
         }
 
-        stage('Deploy on Docker Server') {
+        stage('Build Docker Images') {
             steps {
-        sshagent (credentials: ['web-serverSSH']) {
-            sh """
-            ssh -o StrictHostKeyChecking=no ubuntu@3.110.162.216 << 'ENDSSH'
+                echo "Stage-2"
+                sh '''
+                docker build -t backend:latest ./backend
+                docker build -t frontend:latest ./frontend
+                '''
+            }
+        }
 
-            # Create directory if missing
-            mkdir -p ~/frustrated-cloud
-            cd ~/frustrated-cloud
-
-            # Copy files from Jenkins workspace to Docker server
-            rsync -avz --exclude='.git' jenkins@52.66.96.236:/var/lib/jenkins/workspace/docker/backend ./backend
-            rsync -avz --exclude='.git' jenkins@52.66.96.236:/var/lib/jenkins/workspace/docker/frontend ./frontend
-            rsync -avz --exclude='.git' jenkins@52.66.96.236:/var/lib/jenkins/workspace/docker/docker-compose.yml ./
-
-            # Build and run Docker containers with sudo
-            sudo docker build -t frustrated-cloud-backend ./backend
-            sudo docker build -t frustrated-cloud-frontend ./frontend
-
-            sudo docker compose down
-            sudo docker compose up -d --build
-
-            ENDSSH
-            """
+        stage('Deploy to EC2 WebApp Server') {
+            steps {
+                echo "Stage-3"
+                sshagent (credentials: ["${SSH_CRED}"]) {
+                    sh '''
+                    scp -o StrictHostKeyChecking=no docker-compose.yml ubuntu@${WEBAPP_IP}:/home/ubuntu/
+                    rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" ./backend ./frontend ubuntu@${WEBAPP_IP}:/home/ubuntu/
+                    ssh -o StrictHostKeyChecking=no ubuntu@${WEBAPP_IP} "cd /home/ubuntu && docker-compose down && docker-compose up -d --build"
+                    '''
                 }
             }
         }
@@ -44,10 +45,13 @@ pipeline {
 
     post {
         success {
-            echo '✅ Deployment successful!'
+            echo "✅ Deployment completed successfully!"
         }
         failure {
-            echo '❌ Deployment failed!'
+            echo "❌ Deployment failed!"
+        }
+        always {
+            echo "🔁 Pipeline finished."
         }
     }
 }
