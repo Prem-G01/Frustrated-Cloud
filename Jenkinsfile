@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    DOCKERHUB_USER = credentials('dockerhub-username')
+    DOCKERHUB_USER = credentials('doc-pass-username')
     DOCKERHUB_PASS = credentials('dockerhub-password')
   }
 
