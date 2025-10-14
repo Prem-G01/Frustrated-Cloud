@@ -11,7 +11,7 @@ services:
       - ./backend/data:/app/data
     environment:
       - NODE_ENV=production
-    restart: always
+    #restart: always
 
   frontend:
     build: ./frontend
