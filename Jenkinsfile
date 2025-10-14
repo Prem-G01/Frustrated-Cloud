@@ -18,7 +18,6 @@ pipeline {
                 }
             }
         }
-
         stage('Build & Deploy on Remote Docker Server') {
             steps {
                 echo "Stage-2: Building and deploying on remote Docker host"
