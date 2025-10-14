@@ -24,7 +24,7 @@ pipeline {
                 echo "Stage-2: Building and deploying on remote Docker host"
                 sshagent(['web-serverSSH']) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no ${DOCKER_SERVER} <<EOF
+                    ssh -o StrictHostKeyChecking=no ${DOCKER_SERVER} <<"EOF"
                         set -e
                         echo "🚀 Starting deployment on Docker host..."
 
