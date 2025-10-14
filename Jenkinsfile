@@ -24,27 +24,27 @@ pipeline {
                 sshagent(['web-serverSSH']) {
                     sh """
                     ssh -o StrictHostKeyChecking=no ${DOCKER_SERVER} <<'EOF'
-                        set -e
-                        echo "🚀 Starting deployment on Docker host..."
+                    set -e
+                    echo "🚀 Starting deployment on Docker host..."
 
-                        # Ensure project directory exists
-                        if [ ! -d "/home/ubuntu/Frustrated-Cloud" ]; then
-                            echo "📦 Cloning repository..."
-                            git clone https://github.com/Prem-G01/Frustrated-Cloud.git
-                        fi
+                    # Ensure project directory exists
+                    if [ ! -d "/home/ubuntu/Frustrated-Cloud" ]; then
+                        echo "📦 Cloning repository..."
+                        git clone https://github.com/Prem-G01/Frustrated-Cloud.git
+                    fi
 
-                        cd /home/ubuntu/Frustrated-Cloud
-                        echo "🔄 Pulling latest changes..."
-                        git pull origin master
+                    cd /home/ubuntu/Frustrated-Cloud
+                    echo "🔄 Pulling latest changes..."
+                    git pull origin master
 
-                        echo "🧱 Building Docker containers..."
-                        docker compose down || true
-                        docker compose build
+                    echo "🧱 Building Docker containers..."
+                    docker compose down || true
+                    docker compose build
 
-                        echo "🚀 Starting containers..."
-                        docker compose up -d
+                    echo "🚀 Starting containers..."
+                    docker compose up -d
 
-                        echo "✅ Deployment completed successfully!"
+                    echo "✅ Deployment completed successfully!"
                     EOF
                     """
                 }
