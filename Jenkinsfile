@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         APP_NAME = "Frustrated-Cloud"
-        DOCKER_SERVER = "ubuntu@3.110.162.216"
+        DOCKER_SERVER = "ubuntu@15.207.106.190"
     }
 
     stages {
