@@ -5,12 +5,12 @@ services:
     build: ./backend
     container_name: fc-backend
     ports:
-      - "4000:4000"
+      - "5000:3000"
     volumes:
       - ./backend:/app
       - ./backend/data:/app/data
     environment:
-      - PORT=4000
+      - NODE_ENV=production
     restart: always
 
   frontend:
