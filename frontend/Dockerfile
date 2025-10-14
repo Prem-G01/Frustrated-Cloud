@@ -1,12 +1,20 @@
-# build stage
-FROM node:18-alpine AS build
+# Stage 1: Build the frontend
+FROM node:20-alpine AS build
 WORKDIR /app
+
+# Copy package files
 COPY package*.json ./
-RUN npm install --omit=dev
+
+# Install all dependencies including devDependencies
+RUN npm install --legacy-peer-deps
+
+# Copy the rest of the app
 COPY . .
+
+# Build the frontend
 RUN npm run build
 
-# production stage - simple static server using nginx
+# Stage 2: Serve using NGINX
 FROM nginx:stable-alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80
